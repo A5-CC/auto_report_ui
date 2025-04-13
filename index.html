@@ -3,100 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generate Report</title>
-    <style>
-        /* Loading bar styles */
-        #loadingBarContainer {
-            width: 100%;
-            background-color: #f3f3f3;
-            border-radius: 10px;
-            display: none; /* Hide initially */
-        }
-
-        #loadingBar {
-            width: 0;
-            height: 20px;
-            background-color: green;
-            border-radius: 10px;
-        }
-
-        #message {
-            margin-top: 20px;
-            font-size: 18px;
-            color: green;
-            display: none;
-        }
-
-        #downloadLink {
-            margin-top: 10px;
-            font-size: 16px;
-            display: none;
-        }
-    </style>
+    <title>Generate modSTORAGE Daily Report</title>
 </head>
 <body>
-
-    <h1>Generate Report</h1>
+    <h1>Generate modSTORAGE Daily Report</h1>
     
-    <!-- Button to trigger report generation -->
-    <button id="generateReportBtn">Generate Report</button>
-
-    <!-- Loading bar -->
-    <div id="loadingBarContainer">
-        <div id="loadingBar"></div>
-    </div>
-
-    <!-- Message to show when report is generated -->
-    <div id="message"></div>
-
-    <!-- Download link for the report -->
-    <div id="downloadLink"></div>
-
-    <script>
-        document.getElementById('generateReportBtn').addEventListener('click', function() {
-            // Show the loading bar
-            document.getElementById('loadingBarContainer').style.display = 'block';
-            document.getElementById('message').style.display = 'none';
-            document.getElementById('downloadLink').style.display = 'none';
-            
-            // Start the loading animation
-            let loadingBar = document.getElementById('loadingBar');
-            let width = 0;
-            let interval = setInterval(function() {
-                if (width >= 100) {
-                    clearInterval(interval);
-                } else {
-                    width++;
-                    loadingBar.style.width = width + '%';
-                }
-            }, 100); // Adjust speed as needed
-
-            // Make the AJAX request to the backend to generate the report
-            fetch('/generate_report') // Replace with the appropriate route
-                .then(response => response.blob())
-                .then(fileBlob => {
-                    // Hide the loading bar and show the completion message
-                    document.getElementById('loadingBarContainer').style.display = 'none';
-                    document.getElementById('message').style.display = 'block';
-                    document.getElementById('message').innerText = 'Report generation complete!';
-
-                    // Create a download link
-                    let downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(fileBlob);
-                    downloadLink.download = 'report.xlsx'; // Set the filename
-                    downloadLink.innerText = 'Click here to download the report';
-                    document.getElementById('downloadLink').style.display = 'block';
-                    document.getElementById('downloadLink').appendChild(downloadLink);
-                })
-                .catch(error => {
-                    // In case of an error, hide the loading bar and show an error message
-                    clearInterval(interval);
-                    document.getElementById('loadingBarContainer').style.display = 'none';
-                    document.getElementById('message').style.display = 'block';
-                    document.getElementById('message').innerText = 'There was an error generating the report.';
-                });
-        });
-    </script>
-
+    <form action="results.html" method="get">
+        <label for="dateOption">Choose Report Date:</label>
+        <select name="dateOption" id="dateOption">
+            <option value="today">Today</option>
+            <option value="monthAgo">One Month Ago</option>
+            <option value="yearAgo">One Year Ago</option>
+        </select>
+        <br><br>
+        <input type="submit" value="Generate Report">
+    </form>
 </body>
 </html>

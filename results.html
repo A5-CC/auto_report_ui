@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generation Status</title>
+    <style>
+        /* Loading bar styles */
+        #loadingBarContainer {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            display: block;
+        }
+
+        #loadingBar {
+            width: 0;
+            height: 20px;
+            background-color: green;
+            border-radius: 10px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+            display: none;
+        }
+
+        #retryLink {
+            margin-top: 10px;
+            font-size: 16px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generating Report...</h1>
+    
+    <!-- Loading bar -->
+    <div id="loadingBarContainer">
+        <div id="loadingBar"></div>
+    </div>
+
+    <!-- Message to show when report is generated or failed -->
+    <div id="message"></div>
+
+    <!-- Retry link in case of failure -->
+    <div id="retryLink"></div>
+
+    <script>
+        // Show the loading bar
+        let loadingBar = document.getElementById('loadingBar');
+        let width = 0;
+        let interval = setInterval(function() {
+            if (width >= 100) {
+                clearInterval(interval);
+            } else {
+                width++;
+                loadingBar.style.width = width + '%';
+            }
+        }, 100);
+
+        // Function to simulate a server request and wait for the response
+        setTimeout(function() {
+            // Simulating a response after 20 seconds
+            // Replace this with a real AJAX request
+            let success = Math.random() > 0.3; // Randomly decide if it succeeds (70% chance)
+
+            if (success) {
+                // Report generation complete
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').innerText = 'Report generation complete! Click below to download:';
+                
+                let downloadLink = document.createElement('a');
+                downloadLink.href = 'path/to/generated/report.xlsx'; // Replace with the actual download URL
+                downloadLink.innerText = 'Download Report';
+                document.getElementById('retryLink').style.display = 'none';
+                document.body.appendChild(downloadLink);
+            } else {
+                // Report generation failed
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').innerText = 'Report generation failed. Please try again.';
+                
+                let retryLink = document.createElement('a');
+                retryLink.href = 'index.html';
+                retryLink.innerText = 'Go back and try again';
+                document.getElementById('retryLink').style.display = 'block';
+                document.body.appendChild(retryLink);
+            }
+        }, 20000); // Timeout after 20 seconds to simulate the report generation process
+    </script>
+</body>
+</html>
