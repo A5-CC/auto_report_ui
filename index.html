@@ -59,5 +59,56 @@
             <input type="submit" value="Generate Report">
         </form>
     </div>
+
+    <script>
+        async function uploadFiles() {
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+            const file3 = document.getElementById('file3').files[0];
+
+            if (!file1 || !file2 || !file3) {
+                alert('Please upload all three PDF files.');
+                return;
+            }
+
+            // Show loading bar
+            document.getElementById('loading').classList.remove('hidden');
+            let progress = 0;
+            const loadingBar = document.getElementById('loading-bar');
+            const interval = setInterval(() => {
+                progress += 10;
+                loadingBar.style.width = `${progress}%`;
+                if (progress >= 100) clearInterval(interval);
+            }, 200);
+
+            const formData = new FormData();
+            formData.append("file1", file1);
+            formData.append("file2", file2);
+            formData.append("file3", file3);
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/upload-pdfs/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('result').textContent = "Report generation complete!";
+                    setTimeout(() => {
+                        window.location.href = 'results.html';  // Redirect to results page after 3 seconds
+                    }, 3000);
+                } else {
+                    document.getElementById('result').classList.remove('hidden');
+                    document.getElementById('result').textContent = `Report generation failed. Error: ${data.message}`;
+                }
+            } catch (error) {
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('result').textContent = "Report generation failed. Please try again.";
+            }
+        }
+    </script>
 </body>
 </html>
