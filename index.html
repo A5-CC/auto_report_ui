@@ -4,60 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate modSTORAGE Daily Report</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Thin&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f7f7f7;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            background-color: #f4f4f4;
         }
         .container {
             text-align: center;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
         }
-        .file-inputs {
-            margin-bottom: 20px;
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: 300;
         }
         input[type="file"] {
-            margin: 10px;
+            display: block;
+            margin: 10px 0 20px;
         }
-        .loading-bar {
-            width: 0;
-            height: 10px;
-            background-color: #4caf50;
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
             border-radius: 5px;
-            margin: 20px 0;
+            cursor: pointer;
         }
-        .loading {
-            display: none;
-        }
-        .result-message {
-            font-size: 20px;
-            color: #333;
-        }
-        .hidden {
-            display: none;
+        input[type="submit"]:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Generate modSTORAGE Daily Report</h1>
-        <div class="file-inputs">
-            <input type="file" id="file1" accept="application/pdf">
-            <input type="file" id="file2" accept="application/pdf">
-            <input type="file" id="file3" accept="application/pdf">
-        </div>
-        <button onclick="uploadFiles()">Upload Files</button>
-        <div class="loading hidden" id="loading">
-            <p>Uploading... Please wait.</p>
-            <div class="loading-bar" id="loading-bar"></div>
-        </div>
-        <div id="result" class="result-message hidden"></div>
+        <form action="results.html" method="get">
+            <label for="pdfToday">Upload Today's Report (PDF):</label>
+            <input type="file" id="pdfToday" name="pdfToday" accept="application/pdf" required>
+            <label for="pdfMonthAgo">Upload Report from One Month Ago (PDF):</label>
+            <input type="file" id="pdfMonthAgo" name="pdfMonthAgo" accept="application/pdf" required>
+            <label for="pdfYearAgo">Upload Report from One Year Ago (PDF):</label>
+            <input type="file" id="pdfYearAgo" name="pdfYearAgo" accept="application/pdf" required>
+            <br>
+            <input type="submit" value="Generate Report">
+        </form>
     </div>
 
     <script>
