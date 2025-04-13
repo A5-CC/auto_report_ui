@@ -4,18 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report Generation Status</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
     <style>
-        /* Loading bar styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-weight: 100;
+        }
+
         #loadingBarContainer {
-            width: 100%;
-            background-color: #f3f3f3;
+            width: 100px;
+            background-color: #e0e0e0;
             border-radius: 10px;
+            margin: 20px 0;
             display: block;
         }
 
         #loadingBar {
             width: 0;
-            height: 20px;
+            height: 10px;
             background-color: green;
             border-radius: 10px;
         }
@@ -31,6 +47,11 @@
             margin-top: 10px;
             font-size: 16px;
             display: none;
+            color: #007BFF;
+        }
+
+        #retryLink:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -49,7 +70,7 @@
     <div id="retryLink"></div>
 
     <script>
-        // Show the loading bar
+        // Show the loading bar animation
         let loadingBar = document.getElementById('loadingBar');
         let width = 0;
         let interval = setInterval(function() {
@@ -64,7 +85,6 @@
         // Function to simulate a server request and wait for the response
         setTimeout(function() {
             // Simulating a response after 20 seconds
-            // Replace this with a real AJAX request
             let success = Math.random() > 0.3; // Randomly decide if it succeeds (70% chance)
 
             if (success) {
@@ -73,7 +93,7 @@
                 document.getElementById('message').innerText = 'Report generation complete! Click below to download:';
                 
                 let downloadLink = document.createElement('a');
-                downloadLink.href = 'path/to/generated/report.xlsx'; // Replace with the actual download URL
+                downloadLink.href = 'path/to/generated/report.pdf'; // Replace with the actual download URL for the PDF
                 downloadLink.innerText = 'Download Report';
                 document.getElementById('retryLink').style.display = 'none';
                 document.body.appendChild(downloadLink);
