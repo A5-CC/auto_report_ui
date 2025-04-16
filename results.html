@@ -68,29 +68,24 @@
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
-
   </style>
 </head>
 <body>
   <h1>Generating Report...</h1>
-
   <div id="spinningBox">📦</div>
   <span id="timer">00:00</span>
-
   <div id="message"></div>
   <a id="tryAgainBtn" class="button" href="index.html" style="display: none;">Try Again</a>
 
   <script>
     let startTime = Date.now();
     let elapsedTime = 0;
-    const maxWaitTime = 9 * 60 * 1000; // 5 minutes in milliseconds
+    const maxWaitTime = 9 * 60 * 1000; // 9 minutes
     const pollInterval = 10000; // 10 seconds
-
     const timerSpan = document.getElementById('timer');
     const messageDiv = document.getElementById('message');
     const tryAgainBtn = document.getElementById('tryAgainBtn');
 
-    // Update timer every second
     function updateTimer() {
       elapsedTime = Date.now() - startTime;
       const mins = Math.floor(elapsedTime / 60000);
@@ -99,24 +94,20 @@
 
       if (elapsedTime >= maxWaitTime) {
         clearInterval(timerInterval);
-        messageDiv.textContent = "Time's up. Please try again later.";
-        // Stop the spinning box
+        messageDiv.textContent = "⏳ Time's up. Please try again later.";
         document.getElementById('spinningBox').style.animation = 'none';
-        // Show the "Try Again" button
         tryAgainBtn.style.display = 'inline-block';
       }
     }
 
     const timerInterval = setInterval(updateTimer, 1000);
-    updateTimer(); // Initialize immediately
+    updateTimer(); // initialize immediately
 
-    // Cleanup function to delete files from server
     async function cleanupFiles() {
       try {
-
-          const cleanupResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
-            method: "DELETE"
-          });
+        await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
+          method: "DELETE"
+        });
       } catch (err) {
         console.error("Error during file cleanup:", err);
       }
@@ -127,42 +118,47 @@
 
       async function checkStatus() {
         try {
-          const response = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done", {
-            method: "GET"
-          });
+          const response = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done");
 
           if (!response.ok) throw new Error("Server error");
-
-          console.log("Report status response:", response);
           const data = await response.json();
-          if (data.report_ready) {
-            // Auto-download the file
+          console.log("Poll response:", data);
+
+          if (data.done && data.download_url) {
+            // Create a hidden download link and trigger it
             const link = document.createElement("a");
             link.href = "https://auto.report.s3.amazonaws.com/final_report.xlsx";
             link.download = "final_report.xlsx";
+            link.style.display = "none";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
 
-            messageDiv.textContent = "✅ Report downloaded successfully.";
-            clearInterval(timerInterval); // Stop the timer
-            document.getElementById('spinningBox').style.animation = 'none'; // Stop the spinning box
+            // Update message and stop animations
+            messageDiv.textContent = "✅ Report downloaded. Redirecting...";
+            clearInterval(timerInterval);
+            document.getElementById('spinningBox').style.animation = 'none';
             cleanupFiles();
+
+            // Redirect after short delay to allow browser to begin download
+            setTimeout(() => {
+              window.location.href = "index.html"; // or your preferred home page
+            }, 2000); // 2 seconds
             return;
           } else {
             attempts++;
-            if (elapsedTime < maxWaitTime && attempts < 30) { // Retry until max wait time or max attempts
+            if (elapsedTime < maxWaitTime && attempts < 54) {
               setTimeout(checkStatus, pollInterval);
             } else {
-              messageDiv.textContent = "Timeout reached, please try again.";
-              document.getElementById('spinningBox').style.animation = 'none'; // Stop the spinning box
-              tryAgainBtn.style.display = 'inline-block'; // Show the "Try Again" button
+              messageDiv.textContent = "❌ Timeout reached. Please try again.";
+              document.getElementById('spinningBox').style.animation = 'none';
+              tryAgainBtn.style.display = 'inline-block';
               cleanupFiles();
             }
           }
         } catch (err) {
-          console.error("Error during polling:", err);
-          setTimeout(pollForReport, pollInterval); // Retry from scratch in case of error
+          console.error("Polling error:", err);
+          setTimeout(checkStatus, pollInterval); // retry
         }
       }
 
@@ -170,10 +166,6 @@
     }
 
     pollForReport();
-
-
-
   </script>
-
 </body>
 </html>

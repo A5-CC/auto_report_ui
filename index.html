@@ -93,6 +93,18 @@
   </div>
 
   <script>
+    // Cleanup function to delete files from server
+    async function cleanupFiles() {
+      try {
+
+          const cleanupResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
+            method: "DELETE"
+          });
+      } catch (err) {
+        console.error("Error during file cleanup:", err);
+      }
+    }
+
     async function uploadFiles(event) {
       event.preventDefault(); // Stop form from submitting normally
 
@@ -111,6 +123,8 @@
       formData.append("file3", file3);
 
       try {
+
+        cleanupFiles()
         // First, upload the PDFs
         const uploadResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/upload-pdfs/", {
           method: "POST",
