@@ -118,10 +118,31 @@
 
         if (data.status_code === 200) {
           const workbook = XLSX.utils.book_new();
-          const rows = Object.values(data.report_data);
-          const worksheet = XLSX.utils.aoa_to_sheet(rows);
+          const worksheet = XLSX.utils.aoa_to_sheet([]); // start with empty sheet
+
+          Object.values(data.report_data).forEach((rowArr, rowIndex) => {
+            rowArr.forEach((cellVal, colIndex) => {
+              const cellAddress = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+
+              // If value is a formula string
+              if (typeof cellVal === 'string' && cellVal.startsWith('=')) {
+                worksheet[cellAddress] = { f: cellVal.substring(1) }; // remove '=' and assign formula
+              } else {
+                worksheet[cellAddress] = { v: cellVal };
+              }
+            });
+          });
+
+          // Don't forget to define the sheet range
+          const range = XLSX.utils.encode_range({
+            s: { r: 0, c: 0 },
+            e: { r: Object.values(data.report_data).length - 1, c: Object.values(data.report_data)[0].length - 1 },
+          });
+          worksheet['!ref'] = range;
+
           XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
           XLSX.writeFile(workbook, "final_report.xlsx");
+
 
           messageDiv.textContent = "✅ Report downloaded.";
           clearInterval(timerInterval);  // Stop the timer when report is downloaded
