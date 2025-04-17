@@ -90,6 +90,7 @@
     const tryAgainBtn = document.getElementById('tryAgainBtn');
     const spinner = document.getElementById('spinningBox');
 
+    // Timer update function
     function updateTimer() {
       elapsedTime = Date.now() - startTime;
       const mins = Math.floor(elapsedTime / 60000);
@@ -97,75 +98,65 @@
       timerSpan.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
       if (elapsedTime >= maxWaitTime) {
-        clearInterval(timerInterval);
+        clearInterval(timerInterval);  // Stop timer when max wait time reached
         messageDiv.textContent = "⏳ Time's up. Please try again later.";
         if (spinner) spinner.style.animation = 'none';
         if (tryAgainBtn) tryAgainBtn.style.display = 'inline-block';
       }
     }
 
+    // Start the timer
     const timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
 
-    async function cleanupFiles() {
+    async function checkStatus() {
       try {
-        await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
-          method: "DELETE"
+        const response = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done", {
+          method: "GET"
         });
+        const data = await response.json();
+
+        if (data.status_code === 200) {
+          const workbook = XLSX.utils.book_new();
+          const rows = Object.values(data.report_data);
+          const worksheet = XLSX.utils.aoa_to_sheet(rows);
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+          XLSX.writeFile(workbook, "final_report.xlsx");
+
+          messageDiv.textContent = "✅ Report downloaded.";
+          clearInterval(timerInterval);  // Stop the timer when report is downloaded
+          if (spinner) spinner.style.animation = 'none';
+          cleanupFiles();
+
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 2000);
+        }
       } catch (err) {
-        console.error("Error during file cleanup:", err);
+        console.error("Polling error:", err);
       }
     }
 
     async function pollForReport() {
       let attempts = 0;
 
-      async function checkStatus() {
-        try {
-          const response = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done", {
-            method: "GET"
-          });
-          const data = await response.json();
-
-          if (data.status_code === 200) {
-            const workbook = XLSX.utils.book_new();
-            const rows = Object.values(data.report_data);
-            const worksheet = XLSX.utils.aoa_to_sheet(rows);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-            XLSX.writeFile(workbook, "final_report.xlsx");
-
-            messageDiv.textContent = "✅ Report downloaded.";
-            clearInterval(timerInterval);
-            if (spinner) spinner.style.animation = 'none';
-            cleanupFiles();
-
-            setTimeout(() => {
-              window.location.href = "index.html";
-            }, 2000);
-
-            return;
-
-          } else {
-            attempts++;
-            if (elapsedTime < maxWaitTime && attempts < 54) {
-              setTimeout(checkStatus, pollInterval);
-            } else {
-              messageDiv.textContent = "❌ Timeout reached. Please try again.";
-              if (spinner) spinner.style.animation = 'none';
-              if (tryAgainBtn) tryAgainBtn.style.display = 'inline-block';
-              cleanupFiles();
-            }
-          }
-        } catch (err) {
-          console.error("Polling error:", err);
-          setTimeout(checkStatus, pollInterval); // retry
+      const interval = setInterval(() => {
+        if (attempts < 54) {
+          checkStatus();
+          attempts++;
+          updateTimer();  // Update timer on each poll cycle
+        } else {
+          clearInterval(interval);  // Stop polling after 54 attempts
+          messageDiv.textContent = "❌ Timeout reached. Please try again.";
+          if (spinner) spinner.style.animation = 'none';
+          if (tryAgainBtn) tryAgainBtn.style.display = 'inline-block';
+          cleanupFiles();
         }
-      }
-
-      checkStatus();
+      }, 10000); // Poll every 10 seconds
     }
 
     pollForReport();
+
   </script>
 </body>
 </html>
