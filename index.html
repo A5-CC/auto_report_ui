@@ -130,8 +130,10 @@
           method: "POST",
           body: formData
         });
+        const data = await uploadResponse.json();
 
-        if (uploadResponse.ok) {
+
+        if (data.status_code === 200) {
           // Call the /generate-final-report after the upload is successful
           const generateReportResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report", {
             method: "GET"
