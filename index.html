@@ -130,24 +130,37 @@
           method: "POST",
           body: formData
         });
+
         const data = await uploadResponse.json();
 
-
         if (data.status_code === 200) {
-          // Call the /generate-final-report after the upload is successful
-          const generateReportResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report", {
+          // ✅ New: Check how many files are in the S3 bucket
+          const countResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/check-upload", {
             method: "GET"
           });
 
-          if (generateReportResponse.ok) {
-            // Redirect to results page after successful report generation
-            window.location.href = 'results.html';
+          const countData = await countResponse.json();
+
+          if (countResponse.ok && countData.fileCount >= 3) {
+            // Proceed to generate the report
+            const generateReportResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report", {
+              method: "GET"
+            });
+
+            if (generateReportResponse.ok) {
+              window.location.href = 'results.html';
+            } else {
+              document.getElementById('result').textContent = "Report generation failed. Please try again.";
+            }
           } else {
-            document.getElementById('result').textContent = "Report generation failed. Please try again.";
+            document.getElementById('result').textContent = "❌ Upload error: Not all files were saved. Please try again.";
+            cleanupFiles();  // Optional: Clean up on failure
           }
+
         } else {
           document.getElementById('result').textContent = "Upload failed. Please try again.";
         }
+
       } catch (error) {
         document.getElementById('result').textContent = "An error occurred. Please try again.";
       }
