@@ -108,6 +108,17 @@
     // Start the timer
     const timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
+    
+    async function cleanupFiles() {
+      try {
+        await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
+          method: "DELETE"
+        });
+      } catch (err) {
+        console.error("Error during file cleanup:", err);
+      }
+    }
+
 
     async function checkStatus(interval) {
       try {

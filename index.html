@@ -93,20 +93,20 @@
   </div>
 
   <script>
-    // Cleanup function to delete files from server
-    async function cleanupFiles() {
-      try {
+    let sessionId = null;
 
-          const cleanupResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
-            method: "DELETE"
-          });
-      } catch (err) {
-        console.error("Error during file cleanup:", err);
-      }
+    async function initSession() {
+      const res = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/init-session");
+      const data = await res.json();
+      sessionId = data.session_id;
     }
 
     async function uploadFiles(event) {
-      event.preventDefault(); // Stop form from submitting normally
+      event.preventDefault();
+
+      if (!sessionId) {
+        await initSession(); // Ensure session ID is initialized
+      }
 
       const file1 = document.getElementById('file1').files[0];
       const file2 = document.getElementById('file2').files[0];
@@ -123,10 +123,8 @@
       formData.append("file3", file3);
 
       try {
-
-        cleanupFiles()
-        // First, upload the PDFs
-        const uploadResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/upload-pdfs/", {
+        // Upload files with session ID in query
+        const uploadResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/upload-pdfs?session_id=${sessionId}`, {
           method: "POST",
           body: formData
         });
@@ -134,38 +132,30 @@
         const data = await uploadResponse.json();
 
         if (data.status_code === 200) {
-          // ✅ New: Check how many files are in the S3 bucket
-          const countResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/check-upload", {
-            method: "GET"
-          });
-
+          // Check uploaded files
+          const countResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/check-upload?session_id=${sessionId}`);
           const countData = await countResponse.json();
 
-          if (countResponse.ok && countData.fileCount >= 3) {
-            // Proceed to generate the report
-            const generateReportResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report", {
-              method: "GET"
-            });
-
-            if (generateReportResponse.ok) {
+          if (countData.fileCount >= 3) {
+            const generateResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report");
+            if (generateResponse.ok) {
               window.location.href = 'results.html';
             } else {
               document.getElementById('result').textContent = "Report generation failed. Please try again.";
             }
           } else {
             document.getElementById('result').textContent = "❌ Upload error: Not all files were saved. Please try again.";
-            cleanupFiles();  // Optional: Clean up on failure
           }
-
         } else {
           document.getElementById('result').textContent = "Upload failed. Please try again.";
         }
-
       } catch (error) {
         document.getElementById('result').textContent = "An error occurred. Please try again.";
       }
     }
 
+    window.onload = initSession;
   </script>
+
 </body>
 </html>
