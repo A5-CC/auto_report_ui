@@ -137,7 +137,7 @@
           const countData = await countResponse.json();
 
           if (countData.fileCount >= 3) {
-            const generateResponse = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report");
+            const generateResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report?session_id=${sessionId}`);
             if (generateResponse.ok) {
               window.location.href = 'results.html';
             } else {
