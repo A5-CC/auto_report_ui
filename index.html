@@ -100,6 +100,10 @@
       const data = await res.json();
       sessionId = data.session_id;
     }
+    
+    // In your uploadFiles function on the upload page:
+    localStorage.setItem("session_id", sessionId);
+
 
     async function uploadFiles(event) {
       event.preventDefault();

@@ -108,12 +108,16 @@
     // Start the timer
     const timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
-    
+
+    const sessionId = localStorage.getItem("session_id");
+
     async function cleanupFiles() {
       try {
-        await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-all-files", {
+        await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/delete-files?session_id=${sessionId}`, {
           method: "DELETE"
         });
+        localStorage.removeItem("session_id");
+
       } catch (err) {
         console.error("Error during file cleanup:", err);
       }
@@ -122,7 +126,7 @@
 
     async function checkStatus(interval) {
       try {
-        const response = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done", {
+        const response = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done?session_id=${sessionId}`, {
           method: "GET"
         });
         const data = await response.json();
@@ -152,7 +156,7 @@
           worksheet['!ref'] = range;
 
           XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
-          XLSX.writeFile(workbook, "final_report.xlsx");
+          XLSX.writeFile(workbook, `${sessionId}_final_report.xlsx`);
 
           // ✅ Clean up after success
           clearInterval(interval);
