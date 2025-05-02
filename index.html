@@ -99,10 +99,11 @@
       const res = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/init-session");
       const data = await res.json();
       sessionId = data.session_id;
+      // In your uploadFiles function on the upload page:
+      localStorage.setItem("session_id", sessionId);
     }
-    
-    // In your uploadFiles function on the upload page:
-    localStorage.setItem("session_id", sessionId);
+
+
 
 
     async function uploadFiles(event) {
