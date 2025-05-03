@@ -209,7 +209,7 @@
           clearInterval(timerInterval);  // If you have a separate timer interval
           if (spinner) spinner.style.animation = 'none';
           messageDiv.textContent = "✅ Report downloaded.";
-          cleanupFiles();
+          //cleanupFiles();
 
           // Redirect after short delay
           setTimeout(() => {
@@ -249,7 +249,7 @@
           clearInterval(timerInterval);  // If you have a separate timer interval
           if (spinner) spinner.style.animation = 'none';
           messageDiv.textContent = "✅ Report downloaded.";
-          cleanupFiles();
+          //cleanupFiles();
 
           // Redirect after short delay
           setTimeout(() => {
@@ -275,7 +275,7 @@
           if (spinner) spinner.style.animation = 'none';
           messageDiv.textContent = "❌ Timeout reached. Please try again.";
           if (tryAgainBtn) tryAgainBtn.style.display = 'inline-block';
-          cleanupFiles();
+          //cleanupFiles();
         }
       }, 10000); // every 10 seconds
     }
