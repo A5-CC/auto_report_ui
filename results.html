@@ -298,10 +298,29 @@
 
       const interval = setInterval(() => {
         if (attempts < 54) {
-          checkStatus(interval);  // Pass interval into checkStatus
+          // Fetch the status from the API
+          fetch(`/report-done?session_id=${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.report_ready) {
+                // Report is ready, download it
+                downloadReport(sessionId);
+
+                // Stop polling and clean up
+                clearInterval(interval);
+                clearInterval(timerInterval);
+                if (spinner) spinner.style.animation = 'none';
+                messageDiv.textContent = "✅ Report downloaded.";
+              }
+            })
+            .catch(err => {
+              console.error("Error checking report status:", err);
+            });
+
           attempts++;
           updateTimer();
         } else {
+          // Timeout reached, stop polling
           clearInterval(interval);
           clearInterval(timerInterval);
           if (spinner) spinner.style.animation = 'none';
@@ -311,6 +330,7 @@
         }
       }, 10000); // every 10 seconds
     }
+
 
 
     pollForReport();
