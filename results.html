@@ -299,7 +299,7 @@
       const interval = setInterval(() => {
         if (attempts < 54) {
           // Fetch the status from the API
-          fetch(`/report-done?session_id=${sessionId}`)
+          fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done?session_id=${sessionId}`)
             .then(response => response.json())
             .then(data => {
               if (data.report_ready) {
