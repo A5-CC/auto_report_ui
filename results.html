@@ -136,7 +136,7 @@
         const a = document.createElement('a');
         a.href = url;
         a.download = `${sessionId}_final_report.xlsx`;
-        document.body.appendChild(a);  // ensure it's in the DOM
+        document.body.appendChild(a);
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
@@ -147,6 +147,7 @@
         cleanupFiles();
       }
     }
+
 
 
 
