@@ -292,12 +292,26 @@
     function pollForReport() {
       let attempts = 0;
 
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         if (attempts < 54) {
-          //checkStatus(interval);  // Pass interval into checkStatus
-          downloadReport(sessionId)
-          attempts++;
-          updateTimer();
+          try {
+            const response = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/report-done?session_id=${sessionId}`);
+            const data = await response.json();
+
+            if (data.status_code === 200 && data.report_ready) {
+              clearInterval(interval);
+              clearInterval(timerInterval);
+              if (spinner) spinner.style.animation = 'none';
+              messageDiv.textContent = "✅ Report is ready. Downloading...";
+              downloadReport(sessionId);
+            } else {
+              attempts++;
+              updateTimer();
+            }
+          } catch (err) {
+            console.error("Error checking report status:", err);
+            attempts++;
+          }
         } else {
           clearInterval(interval);
           clearInterval(timerInterval);
@@ -308,6 +322,7 @@
         }
       }, 10000); // every 10 seconds
     }
+
 
 
     pollForReport();
