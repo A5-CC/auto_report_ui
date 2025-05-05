@@ -125,29 +125,29 @@
 
     async function downloadReport(sessionId) {
       try {
-          // Trigger the file download by calling the API endpoint
-          const response = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/download-report?session_id=${sessionId}`);
+        const response = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/download-report?session_id=${sessionId}`);
 
-          const data = await response.json();
+        if (!response.ok) {
+          throw new Error(`Failed to download report: ${response.status}`);
+        }
 
-          if (data.status_code === 200) {
-              // Create a Blob from the response and trigger the download
-              const blob = await response.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `${sessionId}_final_report.xlsx`;
-              a.click();
-              window.URL.revokeObjectURL(url);
-              //cleanupFiles();
-          } else {
-              console.error('Failed to download report');
-          }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${sessionId}_final_report.xlsx`;
+        document.body.appendChild(a);  // ensure it's in the DOM
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        cleanupFiles();
+
       } catch (err) {
-          console.error('Error during report download:', err);
-          //cleanupFiles();
+        console.error('Error during report download:', err);
+        cleanupFiles();
       }
-  }
+    }
+
 
 
     // async function checkStatus(interval) {
@@ -287,13 +287,6 @@
     //     console.error("Polling error:", err);
     //   }
     // }
-    //
-
-
-
-
-
-
 
     function pollForReport() {
       let attempts = 0;
@@ -310,7 +303,7 @@
           if (spinner) spinner.style.animation = 'none';
           messageDiv.textContent = "❌ Timeout reached. Please try again.";
           if (tryAgainBtn) tryAgainBtn.style.display = 'inline-block';
-          //cleanupFiles();
+          cleanupFiles();
         }
       }, 10000); // every 10 seconds
     }
