@@ -154,36 +154,6 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
 
-    // Intro Animation
-    function playIntroAnimation(callback) {
-      var introContainer = document.getElementById("intro-animation");
-      var logo = document.getElementById("logo");
-      var loginContainer = document.getElementById("login-container"); 
-    
-      loginContainer.style.display = "none"; // Hide login before animation starts
-      introContainer.style.display = "flex";
-      logo.style.opacity = "0"; // Ensure it's fully transparent at the start
-    
-      // Fade in the logo
-      setTimeout(function() {
-        logo.style.opacity = "1";
-      }, 500);
-    
-      // Fade out the logo
-      setTimeout(function() {
-        logo.style.opacity = "0";
-    
-        // Hide intro container after fade-out completes
-        setTimeout(function() {
-          introContainer.style.display = "none";
-    
-          // Callback ensures the next action happens only after animation is complete
-          if (callback) callback();
-          
-        }, 3500); // Wait for fade-out to complete before hiding
-      }, 3500);
-    }
-
 
 
     // Login
@@ -199,11 +169,6 @@
       }
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          playIntroAnimation(() => {
-            setTimeout(() => { window.location.href = "process.html"; }, 500);
-          });
-        })
         .catch(() => {
           errorDiv.textContent = "Invalid email or password.";
         });
