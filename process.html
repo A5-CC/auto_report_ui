@@ -5,18 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Generate modSTORAGE Daily Report</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
-  <script type="module">
-    import { getAuth, onAuthStateChanged, signInAnonymously } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-    import { app, auth, storage } from './firebase.js'; 
-    
-
-    onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Not logged in, redirect to login page
-      window.location.href = "index.html";
-    }
-  });
-  </script>
+  
   <style>
     body {
       font-family: 'Roboto', sans-serif;
@@ -172,6 +161,40 @@
     }
 
     window.onload = initSession;
+  </script>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+    import { app } from './firebase.js';
+
+    const auth = getAuth(app);
+    const container = document.getElementById('main-container');
+
+    let sessionId = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html"; // Not logged in, redirect
+      } else {
+        container.style.display = 'block'; // Show page
+        await initSession(); // Initialize session now
+      }
+    });
+
+    async function initSession() {
+      const res = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/init-session");
+      const data = await res.json();
+      sessionId = data.session_id;
+      localStorage.setItem("session_id", sessionId);
+    }
+
+    async function uploadFiles(event) {
+      event.preventDefault();
+      if (!sessionId) await initSession();
+      // ...your existing upload code
+    }
+
+    window.uploadFiles = uploadFiles; // so form can call it via onsubmit
   </script>
 
 </body>
