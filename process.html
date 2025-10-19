@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Generate modSTORAGE Daily Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      text-align: center;
+      padding: 30px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      width: 420px;
+    }
+    h1 {
+      font-weight: 100;
+      margin-bottom: 30px;
+    }
+    .file-box {
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+    .file-box:hover {
+      border-color: #888;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 100;
+      font-size: 14px;
+    }
+    input[type="file"] {
+      font-weight: 100;
+    }
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 100;
+      font-size: 16px;
+    }
+    input[type="submit"]:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: 100;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Generate modSTORAGE Daily Report</h1>
+    <form onsubmit="uploadFiles(event)">
+      <div class="file-box">
+        <label for="file1">Upload Today's Report (PDF):</label>
+        <input type="file" id="file1" name="file1" accept="application/pdf" required>
+      </div>
+
+      <div class="file-box">
+        <label for="file2">Upload Report from One Month Ago (PDF):</label>
+        <input type="file" id="file2" name="file2" accept="application/pdf" required>
+      </div>
+
+      <div class="file-box">
+        <label for="file3">Upload Report from One Year Ago (PDF):</label>
+        <input type="file" id="file3" name="file3" accept="application/pdf" required>
+      </div>
+
+      <input type="submit" value="Generate Report">
+    </form>
+
+    <div id="result" class="hidden"></div>
+  </div>
+
+  <script>
+    let sessionId = null;
+
+    async function initSession() {
+      const res = await fetch("https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/init-session");
+      const data = await res.json();
+      sessionId = data.session_id;
+      // In your uploadFiles function on the upload page:
+      localStorage.setItem("session_id", sessionId);
+    }
+
+
+
+
+    async function uploadFiles(event) {
+      event.preventDefault();
+
+      if (!sessionId) {
+        await initSession(); // Ensure session ID is initialized
+      }
+
+      const file1 = document.getElementById('file1').files[0];
+      const file2 = document.getElementById('file2').files[0];
+      const file3 = document.getElementById('file3').files[0];
+
+      if (!file1 || !file2 || !file3) {
+        alert('Please upload all three PDF files.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file1", file1);
+      formData.append("file2", file2);
+      formData.append("file3", file3);
+
+      try {
+        // Upload files with session ID in query
+        const uploadResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/upload-pdfs?session_id=${sessionId}`, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await uploadResponse.json();
+
+        if (data.status_code === 200) {
+          // Check uploaded files
+          const countResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/check-upload?session_id=${sessionId}`);
+          const countData = await countResponse.json();
+
+          if (countData.fileCount >= 3) {
+            const generateResponse = await fetch(`https://327ls4hmdk6g5vfblgzxkd2ipy0iztje.lambda-url.us-east-1.on.aws/generate-final-report?session_id=${sessionId}`);
+            if (generateResponse.ok) {
+              window.location.href = 'results.html';
+            } else {
+              document.getElementById('result').textContent = "Report generation failed. Please try again.";
+            }
+          } else {
+            document.getElementById('result').textContent = "❌ Upload error: Not all files were saved. Please try again.";
+          }
+        } else {
+          document.getElementById('result').textContent = "Upload failed. Please try again.";
+        }
+      } catch (error) {
+        document.getElementById('result').textContent = "An error occurred. Please try again.";
+      }
+    }
+
+    window.onload = initSession;
+  </script>
+
+</body>
+</html>
