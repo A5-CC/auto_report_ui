@@ -169,6 +169,10 @@
       }
 
       auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            // Redirect after successful login
+            window.location.href = "process.html";
+        })
         .catch(() => {
           errorDiv.textContent = "Invalid email or password.";
         });
