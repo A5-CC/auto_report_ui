@@ -21,16 +21,16 @@
       padding: 32px;
       border-radius: 12px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      width: 280px; /* narrower */
+      width: 260px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 16px; /* uniform spacing */
     }
     h1 {
       text-align: center;
-      font-size: 1.75rem; /* slightly bigger */
-      font-weight: 700; /* bold */
-      margin-bottom: 8px;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0; /* remove extra margin to match gap spacing */
     }
     input[type="text"],
     input[type="password"] {
@@ -40,10 +40,10 @@
       font-size: 1rem;
       outline: none;
       transition: all 0.2s;
-      color: #111; /* input text darker */
+      color: #111;
     }
     input::placeholder {
-      color: #aaa; /* lighter grey placeholder */
+      color: #aaa;
       font-weight: 300;
     }
     input[type="text"]:focus,
@@ -68,6 +68,7 @@
       color: #dc2626;
       font-size: 0.875rem;
       text-align: center;
+      margin: 0; /* remove extra margin */
     }
   </style>
 </head>
@@ -81,7 +82,6 @@
   </form>
 
   <script>
-    // These placeholders will be replaced during deployment
     const VALID_USER = "${LOGIN_USER}";
     const VALID_PASS = "${LOGIN_PASS}";
 
@@ -99,7 +99,6 @@
       }
     }
 
-    // Redirect if already logged in
     if (sessionStorage.getItem("authenticated") === "true") {
       window.location.href = "processing.html";
     }
