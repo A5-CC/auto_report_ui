@@ -24,8 +24,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Install envsubst to safely inject secrets
+      - name: Install envsubst
+        run: sudo apt-get update && sudo apt-get install -y gettext-base
+
+      # Inject LOGIN_USER and LOGIN_PASS into index.html
+      - name: Inject login credentials
+        run: |
+          envsubst < index.html > index.tmp.html
+          mv index.tmp.html index.html
+        env:
+          LOGIN_USER: ${{ secrets.LOGIN_USER }}
+          LOGIN_PASS: ${{ secrets.LOGIN_PASS }}
+
       - run: echo > .nojekyll
 
+      # Upload all files in repo as artifact for Pages
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
