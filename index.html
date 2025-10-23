@@ -62,7 +62,7 @@
 </head>
 <body>
   <div class="login-container">
-    <h1>Secure Login</h1>
+    <h1>Login</h1>
     <input type="text" id="username" placeholder="Username" required />
     <input type="password" id="password" placeholder="Password" required />
     <button onclick="login()">Log In</button>
@@ -70,22 +70,22 @@
   </div>
 
   <script>
-    // These placeholders will be replaced by GitHub Actions
-    const VALID_USER = "__USERNAME__";
-    const VALID_PASS = "__PASSWORD__";
+    // These placeholders will be replaced at build time
+    const VALID_USER = "${LOGIN_USER}";
+    const VALID_PASS = "${LOGIN_PASS}";
 
     function login() {
-      const user = document.getElementById("username").value.trim();
-      const pass = document.getElementById("password").value.trim();
-      const errorMessage = document.getElementById("error-message");
+        const user = document.getElementById("username").value.trim();
+        const pass = document.getElementById("password").value.trim();
+        const errorMessage = document.getElementById("error-message");
 
-      if (user === VALID_USER && pass === VALID_PASS) {
+        if (user === VALID_USER && pass === VALID_PASS) {
         sessionStorage.setItem("authenticated", "true");
         window.location.href = "processing.html";
-      } else {
+        } else {
         errorMessage.textContent = "Invalid username or password.";
-      }
+        }
     }
-  </script>
+    </script>
 </body>
 </html>

@@ -24,11 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inject login credentials
-        run: |
-          sed -i "s|__USERNAME__|${LOGIN_USER}|g" index.html
-          sed -i "s|__PASSWORD__|${LOGIN_PASS}|g" index.html
-
       - run: echo > .nojekyll
 
       - uses: actions/upload-pages-artifact@v3
